@@ -6,12 +6,13 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GameServer {
     private static final int PORT = 1337;
     private static boolean SERVER_RUNNING = true;
-    private static ArrayList<GameServerThread> connections = new ArrayList<>();
+    private static Set<GameServerThread> connections = new HashSet<>();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
