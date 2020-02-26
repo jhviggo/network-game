@@ -1,30 +1,65 @@
 package game;
 
+import async.AsyncReceive;
+import interfaces.GameThread;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
-public class GameClient {
-    private static final String ServerIP = "127.0.0.1";
-    private static final int PORT = 1337;
+public class GameClient extends Thread implements GameThread {
+    private final String ServerIP = "127.0.0.1";
+    private final int PORT = 1337;
 
-    private static Socket clientSocket;
-    private static BufferedReader inFromClient;
-    private static DataOutputStream outToServer;
+    private Socket clientSocket;
+    private BufferedReader inFromClient;
+    private DataOutputStream outToServer;
+    private GameClientHandle gameClientHandle = new GameClientHandle(this);
 
-    public static void connectToServer() throws IOException {
+    private Main gui;
+
+    public GameClient(Main gui) {
+        this.gui = gui;
+    }
+
+    public void run() {
+        try {
+            connectToServer();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        AsyncReceive reciever = new AsyncReceive(clientSocket, this, inFromClient, gameClientHandle);
+        reciever.start();
+    }
+
+    public void connectToServer() throws IOException {
         clientSocket = new Socket(ServerIP, PORT);
         inFromClient = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         outToServer = new DataOutputStream(clientSocket.getOutputStream());
     }
 
-    public static void send(final String message) throws IOException {
-        outToServer.writeBytes(message + "\n");
+    public void send(final String message) {
+        try {
+            outToServer.writeBytes(message + "\n");
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 
-    public static String recieve() throws IOException {
+    public String recieve() throws IOException {
         return inFromClient.readLine();
+    }
+
+    public void interpretCommand(final String command) {
+        final var commands = command.split(" ");
+
+        switch (commands[0]) {
+            case "ADDPLAYER":
+                gui.addEnemyPlayer(commands[1], Integer.parseInt(commands[2]), Integer.parseInt(commands[3]));
+                break;
+        }
     }
 }
