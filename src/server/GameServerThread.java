@@ -21,7 +21,7 @@ public class GameServerThread extends Thread implements GameThread {
 
     public void run() {
         try {
-            AsyncReceive reader = new AsyncReceive(
+            AsyncReceive receiver = new AsyncReceive(
                 connectionSocket,
                 this,
                 new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()))
@@ -31,7 +31,7 @@ public class GameServerThread extends Thread implements GameThread {
                 this,
                 new BufferedReader(new InputStreamReader(System.in))
             );
-            reader.start();
+            receiver.start();
             sender.start();
         } catch (Exception e) {
             System.out.println(e);
