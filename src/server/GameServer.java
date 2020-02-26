@@ -1,12 +1,17 @@
 package server;
 
+import interfaces.GameThread;
+
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class GameServer {
     private static final int PORT = 1337;
     private static boolean SERVER_RUNNING = true;
+    private static ArrayList<GameServerThread> connections = new ArrayList<>();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
@@ -17,11 +22,29 @@ public class GameServer {
             System.out.println("Connection from ["
                     + socket.getInetAddress().getHostAddress()
                     + "]");
-            (new GameServerThread(connectionSocket)).start();
+             GameServerThread connection = new GameServerThread(connectionSocket);
+             connection.start();
+             connections.add(connection);
         }
 
         if (socket != null) {
             socket.close();
+        }
+    }
+
+    public static void closeThread(GameThread thread) {
+        connections.remove(thread);
+    }
+
+    public static void relay(GameThread connection, String message) {
+        for (GameServerThread thread : connections) {
+            if (thread != connection && thread.getSocket().isConnected()) {
+                try {
+                    thread.send(message);
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+            }
         }
     }
 }

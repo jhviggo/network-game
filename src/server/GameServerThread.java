@@ -5,10 +5,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Scanner;
 
+import async.AsyncReceive;
+import async.AsyncSend;
 import game.Player;
+import interfaces.GameThread;
 
-public class GameServerThread extends Thread {
+public class GameServerThread extends Thread implements GameThread {
     private Socket connectionSocket;
 
     public GameServerThread(final Socket connectionSocket) {
@@ -17,11 +21,18 @@ public class GameServerThread extends Thread {
 
     public void run() {
         try {
-            final BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
-            final DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-
-            outToClient.writeBytes("Sir lancelot\n");
-
+            AsyncReceive reader = new AsyncReceive(
+                connectionSocket,
+                this,
+                new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()))
+            );
+            AsyncSend sender = new AsyncSend(
+                connectionSocket,
+                this,
+                new BufferedReader(new InputStreamReader(System.in))
+            );
+            reader.start();
+            sender.start();
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -29,5 +40,19 @@ public class GameServerThread extends Thread {
 
     private void registerPlayer(final String name) {
 
+    }
+
+    public void send(String message) {
+        try {
+            final DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
+            outToClient.writeBytes(message + "\n");
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public Socket getSocket() {
+        return connectionSocket;
     }
 }
