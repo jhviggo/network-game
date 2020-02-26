@@ -1,5 +1,6 @@
 package game;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,6 +104,7 @@ public class Main extends Application {
 			}
 			scoreList.setEditable(false);
 
+			addMe(GameClient.recieve());
 
 			grid.add(mazeLabel,  0, 0);
 			grid.add(scoreLabel, 1, 0);
@@ -125,18 +127,21 @@ public class Main extends Application {
 
             // Setting up standard players
 
-			me = new Player("Orville",9,4,"up");
-			players.add(me);
-			fields[9][4].setGraphic(new ImageView(hero_up));
-
 			Player harry = new Player("Harry",14,15,"up");
 			players.add(harry);
 			fields[14][15].setGraphic(new ImageView(hero_up));
+
 
 			scoreList.setText(getScoreList());
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void addMe(final String name) {
+		Main.me = new Player(name,9,4,"up");
+		Main.players.add(me);
+		fields[9][4].setGraphic(new ImageView(hero_up));
 	}
 
 	public void playerMoved(int delta_x, int delta_y, String direction) {
@@ -196,6 +201,11 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
+		try {
+			GameClient.connectToServer();
+		} catch (IOException e) {
+			System.out.println(e);
+		}
 		launch(args);
 	}
 }
