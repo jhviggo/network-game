@@ -2,21 +2,21 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Scanner;
 
 import async.AsyncReceive;
 import async.AsyncSend;
-import game.Player;
 import interfaces.GameThread;
+import interfaces.RecieverHandle;
 
 public class GameServerThread extends Thread implements GameThread {
     private Socket connectionSocket;
+    private RecieverHandle gameServerHandle;
 
-    public GameServerThread(final Socket connectionSocket) {
+    public GameServerThread(final Socket connectionSocket, GameServerHandle gameServerHandle) {
         this.connectionSocket = connectionSocket;
+        this.gameServerHandle = gameServerHandle;
     }
 
     public void run() {
@@ -24,7 +24,8 @@ public class GameServerThread extends Thread implements GameThread {
             AsyncReceive receiver = new AsyncReceive(
                 connectionSocket,
                 this,
-                new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()))
+                new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())),
+                gameServerHandle
             );
             AsyncSend sender = new AsyncSend(
                 connectionSocket,
@@ -36,10 +37,6 @@ public class GameServerThread extends Thread implements GameThread {
         } catch (Exception e) {
             System.out.println(e);
         }
-    }
-
-    private void registerPlayer(final String name) {
-
     }
 
     public void send(String message) {

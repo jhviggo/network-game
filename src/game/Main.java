@@ -27,6 +27,9 @@ public class Main extends Application {
 	public static Player me;
 	public static List<Player> players = new ArrayList<Player>();
 
+	private String myName = "sir.swagsalot";
+	private GameClient gameClient = new GameClient(this);
+
 	private Label[][] fields;
 	private TextArea scoreList;
 
@@ -104,8 +107,11 @@ public class Main extends Application {
 			}
 			scoreList.setEditable(false);
 
-			addMe(GameClient.recieve());
+			// client/server calls
+			gameClient.start();
+			gameClient.send("ADDPLAYER " + myName + " 9 4");
 
+			// grid setup
 			grid.add(mazeLabel,  0, 0);
 			grid.add(scoreLabel, 1, 0);
 			grid.add(boardGrid,  0, 1);
@@ -138,10 +144,17 @@ public class Main extends Application {
 		}
 	}
 
-	public void addMe(final String name) {
-		Main.me = new Player(name,9,4,"up");
-		Main.players.add(me);
-		fields[9][4].setGraphic(new ImageView(hero_up));
+	public void addEnemyPlayer(final String name, final int x, final int y) {
+		if (players.stream().noneMatch(player -> player.name.equalsIgnoreCase(name))) {
+			System.out.println("Adding player: " + name);
+			Player p = new Player(name, x, y, "down");
+			players.add(p);
+			fields[x][y].setGraphic(new ImageView(hero_up));
+
+			if (p.name.equalsIgnoreCase(myName)) {
+				me = p;
+			}
+		}
 	}
 
 	public void playerMoved(int delta_x, int delta_y, String direction) {
@@ -201,11 +214,6 @@ public class Main extends Application {
 	}
 
 	public static void main(String[] args) {
-		try {
-			GameClient.connectToServer();
-		} catch (IOException e) {
-			System.out.println(e);
-		}
 		launch(args);
 	}
 }

@@ -2,7 +2,6 @@ package server;
 
 import interfaces.GameThread;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,6 +12,7 @@ public class GameServer {
     private static final int PORT = 1337;
     private static boolean SERVER_RUNNING = true;
     private static Set<GameServerThread> connections = new HashSet<>();
+    private static GameServerHandle gameServerHandle = new GameServerHandle();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
@@ -23,7 +23,7 @@ public class GameServer {
             System.out.println("Connection from ["
                     + socket.getInetAddress().getHostAddress()
                     + "]");
-             GameServerThread connection = new GameServerThread(connectionSocket);
+             GameServerThread connection = new GameServerThread(connectionSocket, gameServerHandle);
              connection.start();
              connections.add(connection);
         }
@@ -39,7 +39,7 @@ public class GameServer {
 
     public static void relay(GameThread connection, String message) {
         for (GameServerThread thread : connections) {
-            if (thread != connection && thread.getSocket().isConnected()) {
+            if (thread.getSocket().isConnected()) {
                 try {
                     thread.send(message);
                 } catch (Exception e) {
