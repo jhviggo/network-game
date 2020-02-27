@@ -1,9 +1,9 @@
 package game;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import bot.Bot;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -24,13 +24,20 @@ public class Main extends Application {
 	public static Image image_floor;
 	public static Image image_wall;
 	public static Image hero_right,hero_left,hero_up,hero_down;
+	public static Image image_bot_up;
+	public static Image image_bot_down;
+	public static Image image_bot_right;
+	public static Image image_bot_left;
 
+	private String botName;
+
+	private static Player botPlayer;
 	public static Player me;
 	public static List<Player> players = new ArrayList<Player>();
 
+	private static Bot bot;
 
 	private String myName = "HC";
-
 	private GameClient gameClient = new GameClient(this);
 
 	private Label[][] fields;
@@ -93,6 +100,11 @@ public class Main extends Application {
 			hero_up     = new Image(getClass().getResourceAsStream("Image/heroUp.png"),size,size,false,false);
 			hero_down   = new Image(getClass().getResourceAsStream("Image/heroDown.png"),size,size,false,false);
 
+			image_bot_up = new Image(getClass().getResourceAsStream("Image/bug_up.png"),size,size,false,false);
+			image_bot_down = new Image(getClass().getResourceAsStream("Image/bug_down.png"),size,size,false,false);
+			image_bot_right = new Image(getClass().getResourceAsStream("Image/bug_right.png"),size,size,false,false);
+			image_bot_left = new Image(getClass().getResourceAsStream("Image/bug_left.png"),size,size,false,false);
+
 			fields = new Label[20][20];
 			for (int j=0; j<20; j++) {
 				for (int i=0; i<20; i++) {
@@ -112,6 +124,7 @@ public class Main extends Application {
 
 			// client/server calls
 			gameClient.start();
+			botName = gameClient.getBotName();
 
 			// grid setup
 			grid.add(mazeLabel,  0, 0);
@@ -125,20 +138,13 @@ public class Main extends Application {
 
 			scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
 				switch (event.getCode()) {
-				case UP:    playerMoved(0,-1,"up");    break;
-				case DOWN:  playerMoved(0,+1,"down");  break;
-				case LEFT:  playerMoved(-1,0,"left");  break;
-				case RIGHT: playerMoved(+1,0,"right"); break;
+				case UP:    playerMoved(me, 0,-1,"up");    break;
+				case DOWN:  playerMoved(me, 0,+1,"down");  break;
+				case LEFT:  playerMoved(me, -1,0,"left");  break;
+				case RIGHT: playerMoved(me, +1,0,"right"); break;
 				default: break;
 				}
 			});
-
-            // Setting up standard players
-
-			Player harry = new Player("Harry",14,15,"up");
-			players.add(harry);
-			fields[14][15].setGraphic(new ImageView(hero_up));
-
 
 			scoreList.setText(getScoreList());
 		} catch(Exception e) {
@@ -155,47 +161,36 @@ public class Main extends Application {
 
 			if (p.name.equalsIgnoreCase(myName)) {
 				me = p;
+			} else if (p.name.equalsIgnoreCase(botName)) {
+				botPlayer = p;
+				bot = new Bot(board, botPlayer, me, this);
+				bot.start();
 			}
 		}
 	}
 
-	public void playerMoved(int delta_x, int delta_y, String direction) {
-		me.direction = direction;
-		int x = me.getXpos(),y = me.getYpos();
+	public void playerMoved(Player player ,int delta_x, int delta_y, String direction) {
+		System.out.println(player);
+		player.direction = direction;
+		int x = player.getXpos(),y = player.getYpos();
 
 		if (board[y+delta_y].charAt(x+delta_x)=='w') {
-			me.addPoints(-1);
+			player.addPoints(-1);
 		}
 		else {
 			Player p = getPlayerAt(x+delta_x,y+delta_y);
 			if (p!=null) {
-              me.addPoints(10);
+				player.addPoints(10);
               p.addPoints(-10);
 			} else {
-				me.addPoints(1);
-
-				//fields[x][y].setGraphic(new ImageView(image_floor));
+				player.addPoints(1);
 				x+=delta_x;
 				y+=delta_y;
-
-				//if (direction.equals("right")) {
-				//	fields[x][y].setGraphic(new ImageView(hero_right));
-				//};
-				//if (direction.equals("left")) {
-				//	fields[x][y].setGraphic(new ImageView(hero_left));
-				//};
-				//if (direction.equals("up")) {
-				//	fields[x][y].setGraphic(new ImageView(hero_up));
-				//};
-				//if (direction.equals("down")) {
-				//	fields[x][y].setGraphic(new ImageView(hero_down));
-				//};
-
-				me.setXpos(x);
-				me.setYpos(y);
+				player.setXpos(x);
+				player.setYpos(y);
 			}
 		}
-		gameClient.send("MOVE " + myName + " " + x + " " + y + " " + direction);
+		gameClient.send("MOVE " + player.name + " " + x + " " + y + " " + direction);
 		scoreList.setText(getScoreList());
 	}
 
@@ -225,25 +220,54 @@ public class Main extends Application {
 		int y = player.getYpos();
 		String direction = player.getDirection();
 		if (direction.equals("right")) {
-		    if (board[y].charAt(x-1) != 'w') {
+			if (board[y].charAt(x - 1) != 'w') {
 				Platform.runLater(() -> fields[x - 1][y].setGraphic(new ImageView(image_floor)));
 			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_right)));
 		} else if (direction.equals("left")) {
-			if (board[y].charAt(x+1) != 'w') {
-				Platform.runLater(() -> fields[x+1][y].setGraphic(new ImageView(image_floor)));
+			if (board[y].charAt(x + 1) != 'w') {
+				Platform.runLater(() -> fields[x + 1][y].setGraphic(new ImageView(image_floor)));
 			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_left)));
 		} else if (direction.equals("up")) {
-			if (board[y+1].charAt(x) != 'w') {
-				Platform.runLater(() -> fields[x][y+1].setGraphic(new ImageView(image_floor)));
+			if (board[y + 1].charAt(x) != 'w') {
+				Platform.runLater(() -> fields[x][y + 1].setGraphic(new ImageView(image_floor)));
 			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
 		} else if (direction.equals("down")) {
+			if (board[y - 1].charAt(x) != 'w') {
+				Platform.runLater(() -> fields[x][y - 1].setGraphic(new ImageView(image_floor)));
+			}
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_down)));
+		}
+		// bot movement
+		if (direction.equals("bot_right")) {
+			if (board[y].charAt(x-1) != 'w') {
+				Platform.runLater(() -> fields[x-1][y].setGraphic(new ImageView(image_floor)));
+			}
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(image_bot_right)));
+		} else if (direction.equals("bot_left")) {
+			if (board[y].charAt(x+1) != 'w') {
+				Platform.runLater(() -> fields[x+1][y].setGraphic(new ImageView(image_floor)));
+			}
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(image_bot_left)));
+		} else if (direction.equals("bot_down")) {
 			if (board[y-1].charAt(x) != 'w') {
 				Platform.runLater(() -> fields[x][y-1].setGraphic(new ImageView(image_floor)));
 			}
-			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_down)));
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(image_bot_down)));
+		} else if (direction.equals("bot_up")) {
+			if (board[y+1].charAt(x) != 'w') {
+				Platform.runLater(() -> fields[x][y+1].setGraphic(new ImageView(image_floor)));
+			}
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(image_bot_up)));
+		}
+	}
+
+	@Override
+	public void stop(){
+		if (bot != null) {
+			bot.stopRunning();
 		}
 	}
 
