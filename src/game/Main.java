@@ -28,7 +28,9 @@ public class Main extends Application {
 	public static Player me;
 	public static List<Player> players = new ArrayList<Player>();
 
+
 	private String myName = "HC";
+
 	private GameClient gameClient = new GameClient(this);
 
 	private Label[][] fields;

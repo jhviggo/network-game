@@ -1,11 +1,14 @@
 package server;
 
+import game.Player;
 import interfaces.GameThread;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GameServer {
@@ -13,6 +16,7 @@ public class GameServer {
     private static boolean SERVER_RUNNING = true;
     private static Set<GameServerThread> connections = new HashSet<>();
     private static GameServerHandle gameServerHandle = new GameServerHandle();
+    private static List<Player> playerList = new ArrayList<>();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
@@ -38,14 +42,26 @@ public class GameServer {
     }
 
     public static void relay(GameThread connection, String message) {
-        for (GameServerThread thread : connections) {
-            if (thread.getSocket().isConnected()) {
-                try {
+        String[] messageItems = message.split(" ");
+
+        try {
+
+            for (GameServerThread thread : connections) {
+                if (thread.getSocket().isConnected()) {
                     thread.send(message);
-                } catch (Exception e) {
-                    System.out.println(e);
                 }
             }
+
+            if (messageItems[0].equals("ADDPLAYER")) {
+                for (Player player : playerList) {
+                    connection.send(messageItems[0] + " " + player.getName() + " " + player.getXpos() + " " + player.getYpos());
+                }
+
+                playerList.add(new Player(messageItems[1], Integer.parseInt(messageItems[2]), Integer.parseInt(messageItems[3]), "UP"));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e.getStackTrace());
         }
     }
 }
