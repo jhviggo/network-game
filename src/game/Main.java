@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -27,7 +28,7 @@ public class Main extends Application {
 	public static Player me;
 	public static List<Player> players = new ArrayList<Player>();
 
-	private String myName = "sir.swagsalot";
+	private String myName = "HC";
 	private GameClient gameClient = new GameClient(this);
 
 	private Label[][] fields;
@@ -109,7 +110,6 @@ public class Main extends Application {
 
 			// client/server calls
 			gameClient.start();
-			gameClient.send("ADDPLAYER " + myName + " 9 4");
 
 			// grid setup
 			grid.add(mazeLabel,  0, 0);
@@ -149,7 +149,7 @@ public class Main extends Application {
 			System.out.println("Adding player: " + name);
 			Player p = new Player(name, x, y, "down");
 			players.add(p);
-			fields[x][y].setGraphic(new ImageView(hero_up));
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
 
 			if (p.name.equalsIgnoreCase(myName)) {
 				me = p;
@@ -176,23 +176,24 @@ public class Main extends Application {
 				x+=delta_x;
 				y+=delta_y;
 
-				if (direction.equals("right")) {
-					fields[x][y].setGraphic(new ImageView(hero_right));
-				};
-				if (direction.equals("left")) {
-					fields[x][y].setGraphic(new ImageView(hero_left));
-				};
-				if (direction.equals("up")) {
-					fields[x][y].setGraphic(new ImageView(hero_up));
-				};
-				if (direction.equals("down")) {
-					fields[x][y].setGraphic(new ImageView(hero_down));
-				};
+				//if (direction.equals("right")) {
+				//	fields[x][y].setGraphic(new ImageView(hero_right));
+				//};
+				//if (direction.equals("left")) {
+				//	fields[x][y].setGraphic(new ImageView(hero_left));
+				//};
+				//if (direction.equals("up")) {
+				//	fields[x][y].setGraphic(new ImageView(hero_up));
+				//};
+				//if (direction.equals("down")) {
+				//	fields[x][y].setGraphic(new ImageView(hero_down));
+				//};
 
 				me.setXpos(x);
 				me.setYpos(y);
 			}
 		}
+		gameClient.send("MOVE " + myName + " " + x + " " + y + " " + direction);
 		scoreList.setText(getScoreList());
 	}
 
@@ -211,6 +212,25 @@ public class Main extends Application {
 			}
 		}
 		return null;
+	}
+
+	public List<Player> getPlayers() {
+		return new ArrayList<>(players);
+	}
+
+	public void remotePlayerMoved(Player player) {
+		int x = player.getXpos();
+		int y = player.getYpos();
+		String direction = player.getDirection();
+		if (direction.equals("right")) {
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_right)));
+		} else if (direction.equals("left")) {
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_left)));
+		} else if (direction.equals("up")) {
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
+		} else if (direction.equals("down")) {
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_down)));
+		}
 	}
 
 	public static void main(String[] args) {

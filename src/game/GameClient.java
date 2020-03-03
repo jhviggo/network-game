@@ -10,8 +10,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class GameClient extends Thread implements GameThread {
-    private final String ServerIP = "127.0.0.1";
+    private final String ServerIP = "10.24.3.121";
+    //private final String ServerIP = "127.0.0.1";
     private final int PORT = 1337;
+    private final String myName = "HC";
 
     private Socket clientSocket;
     private BufferedReader inFromClient;
@@ -27,6 +29,7 @@ public class GameClient extends Thread implements GameThread {
     public void run() {
         try {
             connectToServer();
+            send("ADDPLAYER " + myName + " 9 4");
         } catch (IOException e) {
             System.out.println(e);
         }
@@ -59,6 +62,22 @@ public class GameClient extends Thread implements GameThread {
         switch (commands[0]) {
             case "ADDPLAYER":
                 gui.addEnemyPlayer(commands[1], Integer.parseInt(commands[2]), Integer.parseInt(commands[3]));
+                break;
+            case "MOVE":
+                Player player = null;
+                for (Player p : gui.getPlayers()) {
+                    if (p.name.equals(commands[1])) {
+                        player = p;
+                    }
+                }
+                if (player != null) {
+                    player.setXpos((Integer.parseInt(commands[2])));
+                    player.setYpos((Integer.parseInt(commands[3])));
+                    player.setDirection(commands[4]);
+                    gui.remotePlayerMoved(player);
+                }
+                break;
+            case "POINT":
                 break;
         }
     }

@@ -14,7 +14,6 @@ public class GameServerHandle implements RecieverHandle {
     @Override
     public void action(GameThread thread, String message) {
         String[] messageItems = message.split(" ");
-
         if(Arrays.stream(messageItems).anyMatch(item -> Commands.contains(item))) {
             GameServer.relay(thread, message);
         }
