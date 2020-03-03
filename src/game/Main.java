@@ -29,7 +29,7 @@ public class Main extends Application {
 	public static List<Player> players = new ArrayList<Player>();
 
 
-	private String myName = "HC";
+	private String myName = "Kasper";
 
 	private GameClient gameClient = new GameClient(this);
 
