@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Commands {
-    private static List<String> commands = List.of("ADDPLAYER");
+    private static List<String> commands = List.of("ADDPLAYER", "MOVE", "POINT");
 
     public static boolean contains(final String command) {
         return commands.contains(command);
