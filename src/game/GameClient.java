@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
+import static game.Main.players;
+
 public class GameClient extends Thread implements GameThread {
     private final String ServerIP = "127.0.0.1";
     private final int PORT = 1337;
@@ -59,6 +61,9 @@ public class GameClient extends Thread implements GameThread {
         switch (commands[0]) {
             case "ADDPLAYER":
                 gui.addEnemyPlayer(commands[1], Integer.parseInt(commands[2]), Integer.parseInt(commands[3]));
+                break;
+            case "GETPLAYER":
+                send(players.get(0).name + " " + players.get(0).xpos + " " + players.get(0).ypos + " " + players.get(0).direction);
                 break;
         }
     }

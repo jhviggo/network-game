@@ -13,6 +13,8 @@ import interfaces.RecieverHandle;
 public class GameServerThread extends Thread implements GameThread {
     private Socket connectionSocket;
     private RecieverHandle gameServerHandle;
+    private String message;
+    private AsyncReceive receiver;
 
     public GameServerThread(final Socket connectionSocket, GameServerHandle gameServerHandle) {
         this.connectionSocket = connectionSocket;
@@ -21,7 +23,7 @@ public class GameServerThread extends Thread implements GameThread {
 
     public void run() {
         try {
-            AsyncReceive receiver = new AsyncReceive(
+            receiver = new AsyncReceive(
                 connectionSocket,
                 this,
                 new BufferedReader(new InputStreamReader(connectionSocket.getInputStream())),
@@ -52,4 +54,6 @@ public class GameServerThread extends Thread implements GameThread {
     public Socket getSocket() {
         return connectionSocket;
     }
+
+    public AsyncReceive getReceiver() { return receiver; }
 }

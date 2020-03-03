@@ -9,10 +9,11 @@ import java.net.Socket;
 
 public class AsyncReceive extends Thread{
 
-    Socket socket;
-    GameThread thread;
-    BufferedReader br;
-    RecieverHandle handle;
+    private Socket socket;
+    private GameThread thread;
+    private BufferedReader br;
+    private RecieverHandle handle;
+    private String message;
 
     public AsyncReceive(Socket socket, GameThread thread, BufferedReader br, RecieverHandle handle) {
         this.socket = socket;
@@ -24,7 +25,7 @@ public class AsyncReceive extends Thread{
     public void run() {
         try {
             while(true) {
-                String message = br.readLine();
+                message = br.readLine();
                 if (message == null) {
                     handle.close(thread);
                     socket.close();
@@ -39,4 +40,7 @@ public class AsyncReceive extends Thread{
         }
     }
 
+    public String getMessage() {
+        return message;
+    }
 }

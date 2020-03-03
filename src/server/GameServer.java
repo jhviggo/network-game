@@ -1,11 +1,14 @@
 package server;
 
+import game.Player;
 import interfaces.GameThread;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GameServer {
@@ -13,6 +16,7 @@ public class GameServer {
     private static boolean SERVER_RUNNING = true;
     private static Set<GameServerThread> connections = new HashSet<>();
     private static GameServerHandle gameServerHandle = new GameServerHandle();
+    private static List<Player> players = new ArrayList<>();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
@@ -25,6 +29,7 @@ public class GameServer {
                     + "]");
              GameServerThread connection = new GameServerThread(connectionSocket, gameServerHandle);
              connection.start();
+             addPlayer(connection);
              connections.add(connection);
         }
 
@@ -47,5 +52,12 @@ public class GameServer {
                 }
             }
         }
+    }
+
+    public static void addPlayer(GameServerThread connection) {
+        connection.send("GETPLAYER");
+        String[] response = connection.getReceiver().getMessage().split(" ");
+        players.add(new Player(response[0], Integer.parseInt(response[1]), Integer.parseInt(response[2]), response[3]));
+        System.out.println(players.toString());
     }
 }

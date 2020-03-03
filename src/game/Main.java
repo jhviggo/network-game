@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -149,8 +150,7 @@ public class Main extends Application {
 			System.out.println("Adding player: " + name);
 			Player p = new Player(name, x, y, "down");
 			players.add(p);
-			fields[x][y].setGraphic(new ImageView(hero_up));
-
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
 			if (p.name.equalsIgnoreCase(myName)) {
 				me = p;
 			}
@@ -178,16 +178,16 @@ public class Main extends Application {
 
 				if (direction.equals("right")) {
 					fields[x][y].setGraphic(new ImageView(hero_right));
-				};
+				}
 				if (direction.equals("left")) {
 					fields[x][y].setGraphic(new ImageView(hero_left));
-				};
+				}
 				if (direction.equals("up")) {
 					fields[x][y].setGraphic(new ImageView(hero_up));
-				};
+				}
 				if (direction.equals("down")) {
 					fields[x][y].setGraphic(new ImageView(hero_down));
-				};
+				}
 
 				me.setXpos(x);
 				me.setYpos(y);
