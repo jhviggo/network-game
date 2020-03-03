@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
@@ -27,7 +28,7 @@ public class Main extends Application {
 	public static Player me;
 	public static List<Player> players = new ArrayList<Player>();
 
-	private String myName = "sir.swagsalot";
+	private String myName = "Kasper";
 	private GameClient gameClient = new GameClient(this);
 
 	private Label[][] fields;
@@ -109,7 +110,7 @@ public class Main extends Application {
 
 			// client/server calls
 			gameClient.start();
-			gameClient.send("ADDPLAYER " + myName + " 9 4");
+			gameClient.send("ADDPLAYER " + myName + " 13 4");
 
 			// grid setup
 			grid.add(mazeLabel,  0, 0);
@@ -149,8 +150,7 @@ public class Main extends Application {
 			System.out.println("Adding player: " + name);
 			Player p = new Player(name, x, y, "down");
 			players.add(p);
-			fields[x][y].setGraphic(new ImageView(hero_up));
-
+			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
 			if (p.name.equalsIgnoreCase(myName)) {
 				me = p;
 			}
