@@ -44,18 +44,24 @@ public class GameServer {
     public static void relay(GameThread connection, String message) {
         String[] messageItems = message.split(" ");
 
-        for (GameServerThread thread : connections) {
-            if (thread.getSocket().isConnected()) {
-                try {
-                    if (messageItems[0] == "ADDPLAYER") {
-                        playerList.add(new Player(messageItems[1], Integer.parseInt(messageItems[2]), Integer.parseInt(messageItems[3]), "UP"));
-                    }
+        try {
 
+            for (GameServerThread thread : connections) {
+                if (thread.getSocket().isConnected()) {
                     thread.send(message);
-                } catch (Exception e) {
-                    System.out.println(e);
                 }
             }
+
+            if (messageItems[0].equals("ADDPLAYER")) {
+                for (Player player : playerList) {
+                    connection.send(messageItems[0] + " " + player.getName() + " " + player.getXpos() + " " + player.getYpos());
+                }
+
+                playerList.add(new Player(messageItems[1], Integer.parseInt(messageItems[2]), Integer.parseInt(messageItems[3]), "UP"));
+            }
+        }
+        catch (Exception e) {
+            System.out.println(e.getStackTrace());
         }
     }
 }

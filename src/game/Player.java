@@ -36,6 +36,9 @@ public class Player {
 	public void addPoints(int p) {
 		point+=p;
 	}
+	public String getName() {
+		return name;
+	}
 	public String toString() {
 		return name+":   "+point;
 	}
