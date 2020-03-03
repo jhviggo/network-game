@@ -6,9 +6,7 @@ import interfaces.GameThread;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class GameServer {
@@ -16,7 +14,7 @@ public class GameServer {
     private static boolean SERVER_RUNNING = true;
     private static Set<GameServerThread> connections = new HashSet<>();
     private static GameServerHandle gameServerHandle = new GameServerHandle();
-    private static List<Player> playerList = new ArrayList<>();
+    private static Set<Player> playerList = new HashSet<>();
 
     public static void main(final String[] args) throws IOException {
         final ServerSocket socket = new ServerSocket(PORT);
@@ -45,7 +43,6 @@ public class GameServer {
         String[] messageItems = message.split(" ");
 
         try {
-
             for (GameServerThread thread : connections) {
                 if (thread.getSocket().isConnected()) {
                     thread.send(message);
@@ -58,6 +55,16 @@ public class GameServer {
                 }
 
                 playerList.add(new Player(messageItems[1], Integer.parseInt(messageItems[2]), Integer.parseInt(messageItems[3]), "UP"));
+            }
+            else if (messageItems[0].equals("MOVE")) {
+                for (Player player : playerList) {
+                    if (player.getName().equals(messageItems[1])) {
+                        player.setXpos(Integer.parseInt(messageItems[2]));
+                        player.setYpos(Integer.parseInt(messageItems[3]));
+                        player.setDirection(messageItems[4]);
+                        break;
+                    }
+                }
             }
         }
         catch (Exception e) {
