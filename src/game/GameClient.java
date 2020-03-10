@@ -13,7 +13,7 @@ public class GameClient extends Thread implements GameThread {
     //private final String ServerIP = "10.24.3.121";
     private final String ServerIP = "127.0.0.1";
     private final int PORT = 1337;
-    private final String myName = "Kasper";
+    private final String myName = "HC";
 
     private Socket clientSocket;
     private BufferedReader inFromClient;

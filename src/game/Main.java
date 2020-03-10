@@ -29,7 +29,7 @@ public class Main extends Application {
 	public static List<Player> players = new ArrayList<Player>();
 
 
-	private String myName = "Kasper";
+	private String myName = "HC";
 
 	private GameClient gameClient = new GameClient(this);
 
@@ -225,16 +225,24 @@ public class Main extends Application {
 		int y = player.getYpos();
 		String direction = player.getDirection();
 		if (direction.equals("right")) {
-			Platform.runLater(() -> fields[x-1][y].setGraphic(new ImageView(image_floor)));
+		    if (board[y].charAt(x-1) != 'w') {
+				Platform.runLater(() -> fields[x - 1][y].setGraphic(new ImageView(image_floor)));
+			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_right)));
 		} else if (direction.equals("left")) {
-			Platform.runLater(() -> fields[x+1][y].setGraphic(new ImageView(image_floor)));
+			if (board[y].charAt(x+1) != 'w') {
+				Platform.runLater(() -> fields[x+1][y].setGraphic(new ImageView(image_floor)));
+			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_left)));
 		} else if (direction.equals("up")) {
-			Platform.runLater(() -> fields[x][y+1].setGraphic(new ImageView(image_floor)));
+			if (board[y+1].charAt(x) != 'w') {
+				Platform.runLater(() -> fields[x][y+1].setGraphic(new ImageView(image_floor)));
+			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_up)));
 		} else if (direction.equals("down")) {
-			Platform.runLater(() -> fields[x][y-1].setGraphic(new ImageView(image_floor)));
+			if (board[y-1].charAt(x) != 'w') {
+				Platform.runLater(() -> fields[x][y-1].setGraphic(new ImageView(image_floor)));
+			}
 			Platform.runLater(() -> fields[x][y].setGraphic(new ImageView(hero_down)));
 		}
 	}
