@@ -8,12 +8,15 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Random;
 
 public class GameClient extends Thread implements GameThread {
     //private final String ServerIP = "10.24.3.121";
     private final String ServerIP = "127.0.0.1";
     private final int PORT = 1337;
     private final String myName = "HC";
+    private int botIdentifier = Math.abs(new Random().nextInt()) % 9999;
+    private final String botName = "[bot]harry" + botIdentifier;
 
     private Socket clientSocket;
     private BufferedReader inFromClient;
@@ -30,12 +33,17 @@ public class GameClient extends Thread implements GameThread {
         try {
             connectToServer();
             send("ADDPLAYER " + myName + " 9 4");
+            send("ADDPLAYER " + botName + " 14 15");
         } catch (IOException e) {
             System.out.println(e);
         }
 
         AsyncReceive reciever = new AsyncReceive(clientSocket, this, inFromClient, gameClientHandle);
         reciever.start();
+    }
+
+    public String getBotName() {
+        return botName;
     }
 
     public void connectToServer() throws IOException {

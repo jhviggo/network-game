@@ -30,7 +30,7 @@ public class AsyncReceive extends Thread{
                     socket.close();
                     break;
                 }
-                System.out.println(message);
+                System.out.println("[AsyncReceive] " + message);
                 handle.action(thread, message);
             }
             System.out.println("Connection terminated");
